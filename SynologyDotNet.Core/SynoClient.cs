@@ -26,9 +26,10 @@ namespace SynologyDotNet
         /// A session name must be provided to connect. By default, the connector will use the "DSM" name to cover all permissions.
         /// </summary>
         private const string SynoTokenHeader = "X-SYNO-TOKEN";
+
         private object _apiInfosLock = new object();
 
-        #endregion
+        #endregion Fields
 
         #region Apis
 
@@ -47,11 +48,12 @@ namespace SynologyDotNet
             SYNO_FileStation_Info
         });
 
-        #endregion
+        #endregion Apis
 
         #region Properties
 
         private readonly Dictionary<string, ApiInfo> _apiInfos = new Dictionary<string, ApiInfo>();
+
         /// <summary>
         /// Gets the API infos.
         /// </summary>
@@ -94,6 +96,7 @@ namespace SynologyDotNet
         public SynoSession Session { get; private set; }
 
         private readonly HttpClient _httpClient;
+
         /// <summary>
         /// Gets the underlying HttpClient.
         /// </summary>
@@ -103,13 +106,14 @@ namespace SynologyDotNet
         public HttpClient HttpClient => _httpClient;
 
         private readonly List<StationConnectorBase> _connectors = new List<StationConnectorBase>();
+
         /// <summary>
         /// Gets the connectors added to this client. 
         /// These connectors are attached to this SynoClient, so they send requests through this instance.
         /// </summary>
         public StationConnectorBase[] Connectors => _connectors.ToArray();
 
-        #endregion
+        #endregion Properties
 
         #region Constructor
 
@@ -158,7 +162,7 @@ namespace SynologyDotNet
             }
         }
 
-        #endregion
+        #endregion Constructor
 
         #region Public Methods
 
@@ -267,13 +271,13 @@ namespace SynologyDotNet
 
             if (!(loginResult is null))
             {
-                if (loginResult.Success && response.Headers.TryGetValues("Set-Cookie", out var cookies))
+                if (loginResult.Success && response.Headers.TryGetValues("Set-Cookie", out var cookies) && response.Headers.TryGetValues(SynoTokenHeader, out var token))
                 {
                     var result = new SynoSession()
                     {
                         Name = session,
                         Id = loginResult.Data.SID,
-                        Token = loginResult.Data.SynoToken,
+                        Token = token.FirstOrDefault(),
                         Cookie = cookies.ToArray(),
                     };
                     LoadSession(result);
@@ -627,7 +631,7 @@ namespace SynologyDotNet
                 throw new SynoHttpException(msg);
         }
 
-        #endregion
+        #endregion Public Methods
 
         #region Private Methods
 
@@ -691,6 +695,6 @@ namespace SynologyDotNet
             }
         }
 
-        #endregion
+        #endregion Private Methods
     }
 }
