@@ -10,8 +10,8 @@ namespace SynologyDotNet.Core.IntegrationTest
     [TestClass]
     public class SynoClient_Tests : TestBase
     {
-        static SynoClient Client;
-        static SynoSession Session;
+        private static SynoClient Client;
+        private static SynoSession Session;
         //const string SessionName = ""; // "DSM" is accepted too
 
         [ClassInitialize]
@@ -65,10 +65,27 @@ namespace SynologyDotNet.Core.IntegrationTest
         [TestMethod]
         public async Task GetExternalIpAndHostname()
         {
-            var result = await Client.GetExternalIpAndHostname();
+            try
+            {
+                var result = await Client.GetExternalIpAndHostname();
+                Assert.IsTrue(result.Success);
+                // result.Data.DdnsHostname can be empty if it's not configured on the server, so makes no sense to test this.
+                Assert.IsFalse(string.IsNullOrWhiteSpace(result.Data.ExternalIp)); // But external IP must be there.
+            }
+            catch(Exception ex)
+            {
+                //Check if the thrown exception is a NotSupportedException for testing against a Synology Router.
+                //Synology Router doesn't implement this API so the exception is a NotSupportedException in this case.
+                Assert.IsTrue(ex is NotSupportedException);
+            }
+        }
+
+        [TestMethod]
+        public async Task GetSystemInfo()
+        {
+            var result = await Client.GetSystemInfo();
             Assert.IsTrue(result.Success);
-            // result.Data.DdnsHostname can be empty if it's not configured on the server, so makes no sense to test this.
-            Assert.IsFalse(string.IsNullOrWhiteSpace(result.Data.ExternalIp)); // But external IP must be there.
+            Assert.IsFalse(string.IsNullOrWhiteSpace(result.Data.CPU_Series));
         }
 
         [TestMethod]
