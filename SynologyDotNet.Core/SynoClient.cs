@@ -35,6 +35,7 @@ namespace SynologyDotNet
 
         private const string SYNO_Auth = "SYNO.API.Auth";
         private const string SYNO_Info = "SYNO.API.Info";
+        private const string SYNO_Core_System = "SYNO.Core.System";
         private const string SYNO_Core_Desktop_Initdata = "SYNO.Core.Desktop.Initdata";
         private const string SYNO_Core_Desktop_SessionData = "SYNO.Core.Desktop.SessionData";
         private const string SYNO_FileStation_Info = "SYNO.FileStation.Info";
@@ -45,7 +46,8 @@ namespace SynologyDotNet
             SYNO_Auth,
             SYNO_Core_Desktop_Initdata,
             SYNO_Core_Desktop_SessionData,
-            SYNO_FileStation_Info
+            SYNO_FileStation_Info,
+            SYNO_Core_System
         });
 
         #endregion Apis
@@ -108,7 +110,7 @@ namespace SynologyDotNet
         private readonly List<StationConnectorBase> _connectors = new List<StationConnectorBase>();
 
         /// <summary>
-        /// Gets the connectors added to this client. 
+        /// Gets the connectors added to this client.
         /// These connectors are attached to this SynoClient, so they send requests through this instance.
         /// </summary>
         public StationConnectorBase[] Connectors => _connectors.ToArray();
@@ -343,6 +345,17 @@ namespace SynologyDotNet
         {
             var req = new RequestBuilder(GetApiInfo(SYNO_Core_Desktop_Initdata)).Action("external_ip").Method("get");
             var result = await QueryObjectAsync<ApiDataResponse<ExternalIpData>>(req).ConfigureAwait(false);
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the systeminfo from the device. Works with Synology NAS and Router.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ApiDataResponse<SytemInfo>> GetSystemInfo()
+        {
+            var req = new RequestBuilder(GetApiInfo(SYNO_Core_System)).Method("info");
+            var result = await QueryObjectAsync<ApiDataResponse<SytemInfo>>(req).ConfigureAwait(false);
             return result;
         }
 
