@@ -314,7 +314,7 @@ namespace SynologyDotNet
             LoadSession(previousSession);
             if (sendTestRequest)
             {
-                var loginTest = await QueryObjectAsync<ApiResponse>(SYNO_FileStation_Info, "get").ConfigureAwait(false);
+                var loginTest = await GetSystemInfo();
                 if (!loginTest.Success)
                     throw new SynoLoginException(loginTest.Error.Code);
             }
